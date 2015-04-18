@@ -2,6 +2,8 @@
 
 A Redis-backed Rate Limiter for Go
 
+[![wercker status](https://app.wercker.com/status/9832225d9e89d9702d4ce7ca4e8e4285/m "wercker status")](https://app.wercker.com/project/bykey/9832225d9e89d9702d4ce7ca4e8e4285)
+
 ## Usage
 
 - Get a working Redis server
