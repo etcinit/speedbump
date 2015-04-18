@@ -4,14 +4,14 @@ A Redis-backed Rate Limiter for Go
 
 ## Usage
 
-1. Get a working Redis server
-2. Go get:
+- Get a working Redis server
+- Go get:
 
 ```sh
 $ go get github.com/etcinit/speedbump
 ```
 
-3. Include it in your code
+- Include it in your code
 
 ```go
 package main
@@ -56,7 +56,7 @@ func main() {
 }
 ```
 
-4. Output:
+- Output:
 
 ```
 Successful!

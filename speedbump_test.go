@@ -1,6 +1,7 @@
 package speedbump
 
 import (
+	"os"
 	"testing"
 	"time"
 
@@ -10,6 +11,14 @@ import (
 )
 
 func createClient() *redis.Client {
+	if os.Getenv("WERCKER_REDIS_HOST") != "" {
+		return redis.NewTCPClient(&redis.Options{
+			Addr:     os.Getenv("WERCKER_REDIS_HOST") + ":6379",
+			Password: "",
+			DB:       0,
+		})
+	}
+
 	return redis.NewTCPClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",

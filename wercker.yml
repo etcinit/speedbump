@@ -1,0 +1,3 @@
+box: wercker/golang
+services:
+  - wercker/redis
