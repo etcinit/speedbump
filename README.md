@@ -1,6 +1,6 @@
-# [speedbump](https://github.com/etcinit/speedbump)
+# [speedbump](https://github.com/etcinit/speedbump) [![GoDoc](https://godoc.org/github.com/etcinit/speedbump?status.svg)](http://godoc.org/github.com/etcinit/speedbump)
 
-A Redis-backed Rate Limiter for Go [![GoDoc](https://godoc.org/github.com/etcinit/speedbump?status.svg)](http://godoc.org/github.com/etcinit/speedbump)
+A Redis-backed Rate Limiter for Go
 
 [![wercker status](https://app.wercker.com/status/9832225d9e89d9702d4ce7ca4e8e4285/m "wercker status")](https://app.wercker.com/project/bykey/9832225d9e89d9702d4ce7ca4e8e4285)
 
