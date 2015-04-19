@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/facebookgo/clock"
 	"github.com/stretchr/testify/assert"
 
 	"gopkg.in/redis.v2"
@@ -35,7 +36,10 @@ func Test_NewLimiter(t *testing.T) {
 
 func Test_Attempts(t *testing.T) {
 	client := createClient()
-	hasher := PerSecondHasher{}
+	mock := clock.NewMock()
+	hasher := PerSecondHasher{
+		Clock: mock,
+	}
 
 	limiter := NewLimiter(client, hasher, 5)
 
@@ -73,7 +77,7 @@ func Test_Attempts(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, ok)
 
-	time.Sleep(time.Second)
+	mock.Add(time.Second)
 
 	left, err = limiter.Left("127.0.0.1")
 	assert.Nil(t, err)

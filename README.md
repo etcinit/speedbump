@@ -1,8 +1,20 @@
 # [speedbump](https://github.com/etcinit/speedbump)
 
-A Redis-backed Rate Limiter for Go
+A Redis-backed Rate Limiter for Go [![GoDoc](https://godoc.org/github.com/etcinit/speedbump?status.svg)](http://godoc.org/github.com/etcinit/speedbump)
 
 [![wercker status](https://app.wercker.com/status/9832225d9e89d9702d4ce7ca4e8e4285/m "wercker status")](https://app.wercker.com/project/bykey/9832225d9e89d9702d4ce7ca4e8e4285)
+
+## Cool stuff
+
+- Backed by Redis, so it keeps track requests across a cluster
+- Extensible timing functions. Includes defaults for tracking requests per
+second, minute, and hour
+- Works with IPv4, IPv6, or any other unique identifier
+
+## Notes
+
+- This library is fairly new and could break
+- The current implementation could have key leakage/race conditions (See: http://redis.io/commands/incr#pattern-rate-limiter)
 
 ## Usage
 
@@ -34,7 +46,7 @@ func main() {
 	})
 	hasher := speedbump.PerSecondHasher{}
 
-	// Here we create a limiter that will only allow 10 requests per second
+	// Here we create a limiter that will only allow 5 requests per second
 	limiter := speedbump.NewLimiter(client, hasher, 5)
 
 	for {
