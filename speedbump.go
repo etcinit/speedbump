@@ -119,6 +119,8 @@ func (r *RateLimiter) Attempt(id string) (bool, error) {
 	}
 
 	rx := r.redisClient.Multi()
+	defer rx.Close()
+
 	_, err = rx.Exec(func() error {
 		if err := rx.Incr(hash).Err(); err != nil {
 			return err
