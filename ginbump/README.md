@@ -17,7 +17,7 @@ client := redis.NewTCPClient(&redis.Options{
 
 // Limit the engine's or group's requests to a maximum of 100 requests per
 // client per minute.
-engineOrGroup.Use(client, speedbump.PerMinuteHasher{}, 100)
+engineOrGroup.Use(ginbump.RateLimit(client, speedbump.PerMinuteHasher{}, 100))
 ```
 
 after that, if clients stay within the limit, the won't notice anything. If they
