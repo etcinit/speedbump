@@ -59,7 +59,6 @@ func main() {
 			panic(err)
 		}
 
-		//fmt.Println(left)
 		if success {
 			fmt.Println("Successful!")
 		} else {
