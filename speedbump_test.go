@@ -82,7 +82,7 @@ func Test_Attempts(t *testing.T) {
 
 	left, err := limiter.Left("127.0.0.1")
 	assert.Nil(t, err)
-	assert.Equal(t, 0, left)
+	assert.True(t, 0 == left)
 
 	left, err = limiter.Left("127.0.0.2")
 	assert.Nil(t, err)
@@ -96,5 +96,5 @@ func Test_Attempts(t *testing.T) {
 
 	left, err = limiter.Left("127.0.0.1")
 	assert.Nil(t, err)
-	assert.Equal(t, 5, left)
+	assert.True(t, 5 == left)
 }
