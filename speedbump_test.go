@@ -52,7 +52,7 @@ func ExampleNewLimiter() {
 func Test_Attempts(t *testing.T) {
 	client := createClient()
 	mock := clock.NewMock()
-	hasher := PerSecondHasher{
+	hasher := PerMinuteHasher{
 		Clock: mock,
 	}
 
@@ -92,7 +92,7 @@ func Test_Attempts(t *testing.T) {
 	assert.Nil(t, err)
 	assert.True(t, ok)
 
-	mock.Add(time.Second)
+	mock.Add(time.Minute)
 
 	left, err = limiter.Left("127.0.0.1")
 	assert.Nil(t, err)
