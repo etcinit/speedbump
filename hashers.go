@@ -10,6 +10,9 @@ import (
 // PerSecondHasher generates hashes per second. This means you can keep track
 // of N request per second.
 type PerSecondHasher struct {
+	// Clock is the time reference that will be used by the hasher. If it is
+	// not provided, the hashing function will use the default time. This can
+	// be replaced with a mock clock object for testing.
 	Clock clock.Clock
 }
 

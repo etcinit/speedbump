@@ -1,3 +1,4 @@
+// Package speedbump provides a Redis-backed rate limiter.
 package speedbump
 
 import (
@@ -7,19 +8,29 @@ import (
 	"gopkg.in/redis.v2"
 )
 
-// RateLimiter is a Redis-backed rate limiter in Go.
+// RateLimiter is a Redis-backed rate limiter.
 type RateLimiter struct {
+	// redisClient is the client that will be used to talk to the Redis server.
 	redisClient *redis.Client
-	hasher      RateHasher
-	max         int64
+	// hasher is used to generate keys for each counter and to set their
+	// expiration time.
+	hasher RateHasher
+	// max defines the maximum number of attempts that can occur during a
+	// period.
+	max int64
 }
 
-// RateHasher is a hashing funciton capable of generating a hash that uniquely
+// RateHasher is an object capable of generating a hash that uniquely
 // identifies a counter that keeps track of the number of requests attempted by
 // a client on a period of time. The input of the function can be anything that
 // can uniquely identify a client, but it usually an IP address.
 type RateHasher interface {
+	// Hash is the hashing function.
 	Hash(id string) string
+	// Duration returns the duration of each period. This is used to determine
+	// when to expire each counter key, and can also be used by other libraries
+	// to generate messages that provide an estimate of when the limit will
+	// expire.
 	Duration() time.Duration
 }
 
@@ -42,6 +53,9 @@ func (r *RateLimiter) Has(id string) (bool, error) {
 
 // Attempted returns the number of attempted requests for a client in the
 // current period.
+//
+// Not all attempts will be recorded, once the limit has been reached, the
+// counter will stop adding up.
 func (r *RateLimiter) Attempted(id string) (int64, error) {
 	has, err := r.Has(id)
 

@@ -1,6 +1,7 @@
 package speedbump
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -32,6 +33,34 @@ func Test_PerSecond_Hash(t *testing.T) {
 	// Test that it can create a new clock
 	hasher = PerSecondHasher{}
 	hasher.Hash("127.0.0.1")
+}
+
+// The following example shows how to create mock hashers for testing the rate
+// limiter in your code:
+func ExamplePerSecondHasher() {
+	// Create a mock clock.
+	mock := clock.NewMock()
+
+	// Create a new per second hasher with the mock clock.
+	hasher := PerMinuteHasher{
+		Clock: mock,
+	}
+
+	// Generate two consecutive hashes. On most systems, the following should
+	// generate two identical hashes.
+	hashOne := hasher.Hash("127.0.0.1")
+	hashTwo := hasher.Hash("127.0.0.1")
+
+	// Now we push the clock forward by a minute (time travel).
+	mock.Add(time.Minute)
+
+	// The third hash should be different now.
+	hashThree := hasher.Hash("127.0.0.1")
+
+	fmt.Println(hashOne == hashTwo)
+	fmt.Println(hashOne == hashThree)
+	// Output: true
+	// false
 }
 
 func Test_PerSecond_Duration(t *testing.T) {

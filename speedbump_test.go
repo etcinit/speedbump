@@ -1,6 +1,7 @@
 package speedbump
 
 import (
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -32,6 +33,20 @@ func Test_NewLimiter(t *testing.T) {
 	hasher := PerSecondHasher{}
 
 	NewLimiter(client, hasher, 10)
+}
+
+func ExampleNewLimiter() {
+	// Create a Redis client.
+	client := createClient()
+
+	// Create a new hasher.
+	hasher := PerSecondHasher{}
+
+	// Create a new limiter that will only allow 10 requests per second.
+	limiter := NewLimiter(client, hasher, 10)
+
+	fmt.Println(limiter.Attempt("127.0.0.1"))
+	// Output: true <nil>
 }
 
 func Test_Attempts(t *testing.T) {

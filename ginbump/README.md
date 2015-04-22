@@ -20,9 +20,9 @@ client := redis.NewTCPClient(&redis.Options{
 engineOrGroup.Use(ginbump.RateLimit(client, speedbump.PerMinuteHasher{}, 100))
 ```
 
-after that, if clients stay within the limit, the won't notice anything. If they
-do go over the limit, the will get an HTTP 429 error (Too Many Requests) with
-the following content:
+after that, if clients stay within the limit, they won't notice anything. If
+they do go over the limit, the will get an HTTP 429 error (Too Many Requests)
+with the following content:
 
 ```js
 {
