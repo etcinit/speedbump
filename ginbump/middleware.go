@@ -57,3 +57,42 @@ func RateLimit(client *redis.Client, hasher speedbump.RateHasher, max int64) gin
 		// log.Print(ip + " was limited because it exceeded the max rate")
 	}
 }
+
+// RateLimitLB is very similar to RateLimit but it takes the X-Forwarded-For
+// header in cosideration when trying to figure the IP address of the client.
+// This is useful for when running a server behind a load balancer or proxy.
+//
+// However, this header can be spoofed by the client, so in some cases it could
+// provide a way of getting around the rate limiter.
+//
+// When using this middleware, make sure the load balancer will strip any
+// X-Forwarded-For headers set by the client, and that the server will not be
+// publicly accessible by the public, just the load balancer.
+func RateLimitLB(client *redis.Client, hasher speedbump.RateHasher, max int64) gin.HandlerFunc {
+	limiter := speedbump.NewLimiter(client, hasher, max)
+
+	return func(c *gin.Context) {
+		// Attempt to perform the request
+		ip := GetRequesterAddress(c.Request)
+		ok, err := limiter.Attempt(ip)
+
+		if err != nil {
+			panic(err)
+		}
+
+		if !ok {
+			nextTime := time.Now().Add(hasher.Duration())
+
+			c.JSON(429, gin.H{
+				"status":   "error",
+				"messages": []string{"Rate limit exceeded. Try again in " + humanize.Time(nextTime)},
+			})
+			c.Abort()
+		}
+
+		c.Next()
+
+		// After the request
+		// log.Print(ip + " was limited because it exceeded the max rate")
+	}
+}
