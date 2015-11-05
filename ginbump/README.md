@@ -9,7 +9,7 @@ Somewhere in your Gin engine setup code:
 ```go
 
 // Create a Redis client
-client := redis.NewTCPClient(&redis.Options{
+client := redis.NewClient(&redis.Options{
     Addr:     "localhost:6379",
     Password: "",
     DB:       0,

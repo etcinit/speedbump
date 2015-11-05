@@ -5,7 +5,7 @@ import (
 
 	"github.com/etcinit/speedbump"
 	"github.com/gin-gonic/gin"
-	"gopkg.in/redis.v2"
+	"gopkg.in/redis.v3"
 )
 
 // The following example shows how to set up a rate limitting middleware in Gin
@@ -20,7 +20,7 @@ func ExampleRateLimit() {
 	})
 
 	// Create a Redis client
-	client := redis.NewTCPClient(&redis.Options{
+	client := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,

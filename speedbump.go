@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"gopkg.in/redis.v2"
+	"gopkg.in/redis.v3"
 )
 
 // RateLimiter is a Redis-backed rate limiter.

@@ -38,11 +38,11 @@ import (
 	"time"
 
 	"github.com/etcinit/speedbump"
-	"gopkg.in/redis.v2"
+	"gopkg.in/redis.v3"
 )
 
 func main() {
-	client := redis.NewTCPClient(&redis.Options{
+	client := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
