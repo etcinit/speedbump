@@ -2,7 +2,7 @@
 
 A Redis-backed Rate Limiter for Go
 
-[![wercker status](https://app.wercker.com/status/9832225d9e89d9702d4ce7ca4e8e4285/m "wercker status")](https://app.wercker.com/project/bykey/9832225d9e89d9702d4ce7ca4e8e4285)
+[![wercker status](https://app.wercker.com/status/9832225d9e89d9702d4ce7ca4e8e4285/m/master "wercker status")](https://app.wercker.com/project/bykey/9832225d9e89d9702d4ce7ca4e8e4285)
 
 ## Cool stuff
 
@@ -10,7 +10,9 @@ A Redis-backed Rate Limiter for Go
 - Extensible timing functions. Includes defaults for tracking requests per
 second, minute, and hour
 - Works with IPv4, IPv6, or any other unique identifier
-- Example middleware included for [Gin](https://github.com/gin-gonic/gin) (See: [ginbump](https://github.com/etcinit/speedbump/blob/master/ginbump))
+- Example middleware included for [Gin](https://github.com/gin-gonic/gin) (See: [ginbump](https://github.com/etcinit/speedbump/blob/master/ginbump)) and
+[Negroni](https://github.com/codegangsta/negroni) (See:
+[negronibump](https://github.com/etcinit/speedbump/blob/master/negronibump)))
 
 ## Notes
 
