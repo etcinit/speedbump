@@ -119,7 +119,7 @@ func (r *RateLimiter) Attempt(id string) (bool, error) {
 			return false, err
 		}
 
-		if str != "" && intVal > r.max {
+		if str != "" && intVal >= r.max {
 			return false, nil
 		}
 
