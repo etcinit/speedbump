@@ -12,7 +12,7 @@ second, minute, and hour
 - Works with IPv4, IPv6, or any other unique identifier
 - Example middleware included for [Gin](https://github.com/gin-gonic/gin) (See: [ginbump](https://github.com/etcinit/speedbump/blob/master/ginbump)) and
 [Negroni](https://github.com/codegangsta/negroni) (See:
-[negronibump](https://github.com/etcinit/speedbump/blob/master/negronibump)))
+[negronibump](https://github.com/etcinit/speedbump/blob/master/negronibump))
 
 ## Notes
 
