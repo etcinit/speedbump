@@ -5,7 +5,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/unrolled/render"
 	"github.com/etcinit/speedbump"
-	"gopkg.in/redis.v2"
+	"gopkg.in/redis.v3"
 	"net"
 	"net/http"
 	"time"

@@ -9,19 +9,19 @@ import (
 	"github.com/facebookgo/clock"
 	"github.com/stretchr/testify/assert"
 
-	"gopkg.in/redis.v2"
+	"gopkg.in/redis.v3"
 )
 
 func createClient() *redis.Client {
 	if os.Getenv("WERCKER_REDIS_HOST") != "" {
-		return redis.NewTCPClient(&redis.Options{
+		return redis.NewClient(&redis.Options{
 			Addr:     os.Getenv("WERCKER_REDIS_HOST") + ":6379",
 			Password: "",
 			DB:       0,
 		})
 	}
 
-	return redis.NewTCPClient(&redis.Options{
+	return redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
