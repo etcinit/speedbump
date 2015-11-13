@@ -83,7 +83,7 @@ func (r *RateLimiter) Left(id string) (int64, error) {
 	attempted, err := r.Attempted(id)
 
 	if err != nil {
-		return 0, nil
+		return 0, err
 	}
 
 	left := r.max - attempted
