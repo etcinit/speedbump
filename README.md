@@ -6,7 +6,7 @@ A Redis-backed Rate Limiter for Go
 
 ## Cool stuff
 
-- Backed by Redis, so it keeps track requests across a cluster
+- Backed by Redis, so it keeps track of requests across a cluster
 - Extensible timing functions. Includes defaults for tracking requests per
 second, minute, and hour
 - Works with IPv4, IPv6, or any other unique identifier
