@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"gopkg.in/redis.v3"
+	"gopkg.in/redis.v5"
 )
 
 func createClient() *redis.Client {
