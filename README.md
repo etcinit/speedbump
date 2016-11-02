@@ -38,7 +38,7 @@ import (
 	"time"
 
 	"github.com/etcinit/speedbump"
-	"gopkg.in/redis.v3"
+	"gopkg.in/redis.v5"
 )
 
 func main() {

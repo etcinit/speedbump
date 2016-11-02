@@ -5,17 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"gopkg.in/redis.v3"
+	"gopkg.in/redis.v5"
 )
-
-// errNilMsg is the error message returned from the redis.v3 library when a GET
-// call does not find a requested key in Redis.
-//
-// > If the key does not exist the special value nil is returned.
-// Source: http://redis.io/commands/GET
-//
-// TODO: Use exported redis.Nil in redis.v4 when dependency is upgraded.
-const errNilMsg = "redis: nil"
 
 // RateLimiter is a Redis-backed rate limiter.
 type RateLimiter struct {
@@ -66,7 +57,7 @@ func (r *RateLimiter) Attempted(id string) (int64, error) {
 	hash := r.hasher.Hash(id)
 	val, err := r.redisClient.Get(hash).Result()
 	if err != nil {
-		if err.Error() == errNilMsg {
+		if err == redis.Nil {
 			// Key does not exist. See: http://redis.io/commands/GET
 			return 0, nil
 		}
@@ -99,11 +90,11 @@ func (r *RateLimiter) Left(id string) (int64, error) {
 func (r *RateLimiter) Attempt(id string) (bool, error) {
 	// Create hash from id
 	hash := r.hasher.Hash(id)
-	// Get value for hash in Redis. If errNil is returned, key does not exist.
+	// Get value for hash in Redis. If redis.Nil is returned, key does not exist.
 	exists := true
 	val, err := r.redisClient.Get(hash).Result()
 	if err != nil {
-		if err.Error() == errNilMsg {
+		if err == redis.Nil {
 			// Key does not exist. See: http://redis.io/commands/GET
 			exists = false
 		} else {
@@ -125,16 +116,17 @@ func (r *RateLimiter) Attempt(id string) (bool, error) {
 	// expires between prior existence check and this Incr call.
 	// See: http://redis.io/commands/INCR
 	// See: http://redis.io/commands/INCR#pattern-rate-limiter-1
-	rx := r.redisClient.Multi()
-	defer rx.Close()
-	_, err = rx.Exec(func() error {
-		if err := rx.Incr(hash).Err(); err != nil {
-			return err
-		}
-		if err := rx.Expire(hash, r.hasher.Duration()).Err(); err != nil {
-			return err
-		}
-		return nil
+	err = r.redisClient.Watch(func(rx *redis.Tx) error {
+		_, err := rx.Pipelined(func(pipe *redis.Pipeline) error {
+			if err := pipe.Incr(hash).Err(); err != nil {
+				return err
+			}
+			if err := pipe.Expire(hash, r.hasher.Duration()).Err(); err != nil {
+				return err
+			}
+			return nil
+		})
+		return err
 	})
 	if err != nil {
 		return false, err

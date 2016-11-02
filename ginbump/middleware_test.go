@@ -5,7 +5,7 @@ import (
 
 	"github.com/etcinit/speedbump"
 	"github.com/gin-gonic/gin"
-	"gopkg.in/redis.v3"
+	"gopkg.in/redis.v5"
 )
 
 // The following example shows how to set up a rate limitting middleware in Gin
