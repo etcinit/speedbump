@@ -20,10 +20,10 @@ type RateLimiter struct {
 	max int64
 }
 
-// RateHasher is an object capable of generating a hash that uniquely identifies
-// a counter to track the number of requests for an id over a certain time
-// interval. The input of the Hash function can be any unique id, such as an IP
-// address.
+// RateHasher is an object capable of generating a hash that uniquely
+// identifies a counter to track the number of requests for an id over a
+// certain time interval. The input of the Hash function can be any unique id,
+// such as an IP address.
 type RateHasher interface {
 	// Hash is the hashing function.
 	Hash(id string) string
@@ -35,7 +35,11 @@ type RateHasher interface {
 }
 
 // NewLimiter creates a new instance of a rate limiter.
-func NewLimiter(client *redis.Client, hasher RateHasher, max int64) *RateLimiter {
+func NewLimiter(
+	client *redis.Client,
+	hasher RateHasher,
+	max int64,
+) *RateLimiter {
 	return &RateLimiter{
 		redisClient: client,
 		hasher:      hasher,
@@ -56,6 +60,7 @@ func (r *RateLimiter) Has(id string) (bool, error) {
 func (r *RateLimiter) Attempted(id string) (int64, error) {
 	hash := r.hasher.Hash(id)
 	val, err := r.redisClient.Get(hash).Result()
+
 	if err != nil {
 		if err == redis.Nil {
 			// Key does not exist. See: http://redis.io/commands/GET
@@ -63,6 +68,7 @@ func (r *RateLimiter) Attempted(id string) (int64, error) {
 		}
 		return 0, err
 	}
+
 	if err != nil {
 		return 0, err
 	}
@@ -70,18 +76,21 @@ func (r *RateLimiter) Attempted(id string) (int64, error) {
 	return strconv.ParseInt(val, 10, 64)
 }
 
-// Left returns the number of remaining requests for id during a current period.
+// Left returns the number of remaining requests for id during a current
+// period.
 func (r *RateLimiter) Left(id string) (int64, error) {
 	// Retrieve attempted count.
 	attempted, err := r.Attempted(id)
 	if err != nil {
 		return 0, err
 	}
+
 	// Left is max minus attempted.
 	left := r.max - attempted
 	if left < 0 {
 		return 0, nil
 	}
+
 	return left, nil
 }
 
@@ -90,8 +99,11 @@ func (r *RateLimiter) Left(id string) (int64, error) {
 func (r *RateLimiter) Attempt(id string) (bool, error) {
 	// Create hash from id
 	hash := r.hasher.Hash(id)
-	// Get value for hash in Redis. If redis.Nil is returned, key does not exist.
+
+	// Get value for hash in Redis. If redis.Nil is returned, key does not
+	// exist.
 	exists := true
+
 	val, err := r.redisClient.Get(hash).Result()
 	if err != nil {
 		if err == redis.Nil {
@@ -101,19 +113,23 @@ func (r *RateLimiter) Attempt(id string) (bool, error) {
 			return false, err
 		}
 	}
+
 	// If key exists and is >= max requests, return false.
 	if exists {
 		intVal, err := strconv.ParseInt(val, 10, 64)
 		if err != nil {
 			return false, err
 		}
+
 		if intVal >= r.max {
 			return false, nil
 		}
 	}
+
 	// Otherwise, increment and expire key for hasher.Duration(). Note, we call
 	// Expire even when key already exists to avoid race condition where key
 	// expires between prior existence check and this Incr call.
+	//
 	// See: http://redis.io/commands/INCR
 	// See: http://redis.io/commands/INCR#pattern-rate-limiter-1
 	err = r.redisClient.Watch(func(rx *redis.Tx) error {
@@ -121,13 +137,13 @@ func (r *RateLimiter) Attempt(id string) (bool, error) {
 			if err := pipe.Incr(hash).Err(); err != nil {
 				return err
 			}
-			if err := pipe.Expire(hash, r.hasher.Duration()).Err(); err != nil {
-				return err
-			}
-			return nil
+
+			return pipe.Expire(hash, r.hasher.Duration()).Err()
 		})
+
 		return err
 	})
+
 	if err != nil {
 		return false, err
 	}
