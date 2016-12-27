@@ -14,10 +14,13 @@ second, minute, and hour
 [Negroni](https://github.com/codegangsta/negroni) (See:
 [negronibump](https://github.com/etcinit/speedbump/blob/master/negronibump))
 
-## Notes
+## Versions
 
-- This library is fairly new and could break
-- The current implementation could have key leakage/race conditions (See: http://redis.io/commands/incr#pattern-rate-limiter)
+|Branch|Go Get Command|Client Version|-|
+|---|---|---|---|
+|**v2**|`go get gopkg.in/etcinit/speedbump.v2`|`gopkg.in/redis.v5`|[Link](https://gopkg.in/etcinit/speedbump.v2)|
+|**v1**, **master**|`go get gopkg.in/etcinit/speedbump.v1`|`gopkg.in/redis.v3`|[Link](https://gopkg.in/etcinit/speedbump.v1)|
+|**v0**|`go get gopkg.in/etcinit/speedbump.v0`|`gopkg.in/redis.v2`|[Link](https://gopkg.in/etcinit/speedbump.v0)|
 
 ## Usage
 
