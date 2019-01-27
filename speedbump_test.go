@@ -1,4 +1,4 @@
-package speedbump
+package speedbump_test
 
 import (
 	"fmt"
@@ -7,44 +7,33 @@ import (
 	"time"
 
 	"github.com/facebookgo/clock"
+	"github.com/ntindall/speedbump"
+	contribredis "github.com/ntindall/speedbump/contrib/github.com/go-redis/redis.v5"
+	"github.com/ntindall/speedbump/internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	"gopkg.in/redis.v5"
+	redis "gopkg.in/redis.v5"
 )
 
-func createClient() *redis.Client {
+func createClient() internal.RedisClient {
+	addr := "localhost:6379"
 	if os.Getenv("WERCKER_REDIS_HOST") != "" {
-		return redis.NewClient(&redis.Options{
-			Addr:     os.Getenv("WERCKER_REDIS_HOST") + ":6379",
-			Password: "",
-			DB:       0,
-		})
+		addr = os.Getenv("WERCKER_REDIS_HOST") + ":6379"
 	}
 
-	return redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-	})
+	return contribredis.NewRedisClient(
+		redis.NewClient(&redis.Options{
+			Addr:     addr,
+			Password: "",
+			DB:       0,
+		}),
+	)
 }
 
-func teardown(t *testing.T, client *redis.Client) {
+func teardown(t *testing.T, client internal.RedisClient) {
+
 	// Flush Redis.
-	require.NoError(t, client.FlushAll().Err())
-}
-
-func TestNewLimiter(t *testing.T) {
-	client := createClient()
-	hasher := PerSecondHasher{}
-	max := int64(10)
-	actual := NewLimiter(client, hasher, max)
-
-	assert.Exactly(t, RateLimiter{
-		redisClient: client,
-		hasher:      hasher,
-		max:         max,
-	}, *actual)
+	require.NoError(t, client.(*contribredis.Wrapper).FlushAll().Err())
 }
 
 func ExampleNewLimiter() {
@@ -52,10 +41,10 @@ func ExampleNewLimiter() {
 	client := createClient()
 
 	// Create a new hasher.
-	hasher := PerSecondHasher{}
+	hasher := speedbump.PerSecondHasher{}
 
 	// Create a new limiter that will only allow 10 requests per second.
-	limiter := NewLimiter(client, hasher, 10)
+	limiter := speedbump.NewLimiter(client, hasher, 10)
 
 	fmt.Println(limiter.Attempt("127.0.0.1"))
 	// Output: true <nil>
@@ -66,7 +55,7 @@ func TestHas(t *testing.T) {
 	client := createClient()
 	defer teardown(t, client)
 	// Create limiter of 5 requests/min.
-	limiter := NewLimiter(client, PerMinuteHasher{}, 5)
+	limiter := speedbump.NewLimiter(client, speedbump.PerMinuteHasher{}, 5)
 	// Choose an arbitrary id.
 	testID := "test_id"
 
@@ -106,11 +95,11 @@ func TestAttempt(t *testing.T) {
 	defer teardown(t, client)
 	// Create PerMinuteHasher with mock clock.
 	mock := clock.NewMock()
-	hasher := PerMinuteHasher{
+	hasher := speedbump.PerMinuteHasher{
 		Clock: mock,
 	}
 	// Create limiter of 5 requests/min.
-	limiter := NewLimiter(client, hasher, 5)
+	limiter := speedbump.NewLimiter(client, hasher, 5)
 	// Choose an arbitrary id.
 	testID := "test_id"
 	// Ensure no key exists before first request for testID.
@@ -217,7 +206,7 @@ func TestAttempt(t *testing.T) {
 	assert.True(t, ok, "Attempts returned false after waiting for interval")
 }
 
-func makeNAttempts(t *testing.T, limiter *RateLimiter, id string, n int64) {
+func makeNAttempts(t *testing.T, limiter *speedbump.RateLimiter, id string, n int64) {
 	var i int64
 	for i = 0; i < n; i++ {
 		_, err := limiter.Attempt(id)
@@ -231,12 +220,12 @@ func TestAttemptedLeft(t *testing.T) {
 	defer teardown(t, client)
 	// Create PerMinuteHasher with mock clock.
 	mock := clock.NewMock()
-	hasher := PerMinuteHasher{
+	hasher := speedbump.PerMinuteHasher{
 		Clock: mock,
 	}
 	max := int64(5)
 	// Create limiter of 5 requests/min.
-	limiter := NewLimiter(client, hasher, max)
+	limiter := speedbump.NewLimiter(client, hasher, max)
 	// Choose an arbitrary id.
 	testID := "test_id"
 

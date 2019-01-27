@@ -5,13 +5,17 @@ import (
 	"strconv"
 	"time"
 
-	"gopkg.in/redis.v5"
+	"github.com/ntindall/speedbump/internal"
+)
+
+var (
+	redisNil string = "redis: nil"
 )
 
 // RateLimiter is a Redis-backed rate limiter.
 type RateLimiter struct {
 	// redisClient is the client that will be used to talk to the Redis server.
-	redisClient *redis.Client
+	redisClient internal.RedisClient
 	// hasher is used to generate keys for each counter and to set their
 	// expiration time.
 	hasher RateHasher
@@ -36,7 +40,7 @@ type RateHasher interface {
 
 // NewLimiter creates a new instance of a rate limiter.
 func NewLimiter(
-	client *redis.Client,
+	client internal.RedisClient,
 	hasher RateHasher,
 	max int64,
 ) *RateLimiter {
@@ -51,7 +55,7 @@ func NewLimiter(
 // during the current period.
 func (r *RateLimiter) Has(id string) (bool, error) {
 	hash := r.hasher.Hash(id)
-	return r.redisClient.Exists(hash).Result()
+	return r.redisClient.Exists(hash)
 }
 
 // Attempted returns the number of attempted requests for an id in the current
@@ -59,10 +63,10 @@ func (r *RateLimiter) Has(id string) (bool, error) {
 // interval and only returns the max count after this is reached.
 func (r *RateLimiter) Attempted(id string) (int64, error) {
 	hash := r.hasher.Hash(id)
-	val, err := r.redisClient.Get(hash).Result()
+	val, err := r.redisClient.Get(hash)
 
 	if err != nil {
-		if err == redis.Nil {
+		if err.Error() == redisNil {
 			// Key does not exist. See: http://redis.io/commands/GET
 			return 0, nil
 		}
@@ -104,9 +108,9 @@ func (r *RateLimiter) Attempt(id string) (bool, error) {
 	// exist.
 	exists := true
 
-	val, err := r.redisClient.Get(hash).Result()
+	val, err := r.redisClient.Get(hash)
 	if err != nil {
-		if err == redis.Nil {
+		if err.Error() == redisNil {
 			// Key does not exist. See: http://redis.io/commands/GET
 			exists = false
 		} else {
@@ -132,17 +136,7 @@ func (r *RateLimiter) Attempt(id string) (bool, error) {
 	//
 	// See: http://redis.io/commands/INCR
 	// See: http://redis.io/commands/INCR#pattern-rate-limiter-1
-	err = r.redisClient.Watch(func(rx *redis.Tx) error {
-		_, err := rx.Pipelined(func(pipe *redis.Pipeline) error {
-			if err := pipe.Incr(hash).Err(); err != nil {
-				return err
-			}
-
-			return pipe.Expire(hash, r.hasher.Duration()).Err()
-		})
-
-		return err
-	})
+	err = r.redisClient.IncrAndExpire(hash, r.hasher.Duration())
 
 	if err != nil {
 		return false, err
