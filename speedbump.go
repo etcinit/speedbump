@@ -69,10 +69,6 @@ func (r *RateLimiter) Attempted(id string) (int64, error) {
 		return 0, err
 	}
 
-	if err != nil {
-		return 0, err
-	}
-
 	return strconv.ParseInt(val, 10, 64)
 }
 
